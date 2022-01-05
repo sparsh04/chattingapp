@@ -35,11 +35,23 @@ class _allChatsState extends State<allChats> {
         height: 30,
         child: StreamBuilder<QuerySnapshot>(
             builder: (context, snapshot) {
-              List<String> uid;
+              if(snapshot.connectionState!=ConnectionState.done){
+                return CircularProgressIndicator();
+              }
+              List<String> uid = [];
+              //snapshot.data!.docs.
               snapshot.data!.docs.forEach((element) {
-                print(element['uid']);
+                Map<String,dynamic> d = element.data() as Map<String,dynamic>;
+                if(d.containsKey('uid')) {
+                  uid.add(d['uid']);
+                }
               });
-              return Container();
+              print(uid);
+              return ListView.builder(itemBuilder: (context,index){
+                return statusUpdate(uid: uid[index]);
+              },
+                itemCount: uid.length,
+              );
             },
             stream:
                 FirebaseFirestore.instance.collection('users').get().asStream())
@@ -67,7 +79,9 @@ class _statusUpdateState extends State<statusUpdate> {
         stream: _firestore.collection("users").doc(widget.uid).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.data != null) {
-            return Container();
+            return Container(
+              child: Text("${snapshot.data!['uid']}"),
+            );
           } else {
             return Container();
           }
