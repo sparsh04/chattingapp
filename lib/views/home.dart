@@ -305,7 +305,7 @@ class _ChatRoomListTileState extends State<ChatRoomListTile> {
     //print(profilePicUrl);
     //  String? _user = FirebaseAuth.instance.currentUser?.photoURL;
     //FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    return allChats();
+    return allChats(widget.lastmessage, widget.mysername, username!);
     // return Flexible(
     //   child: Row(
     //     children: [
