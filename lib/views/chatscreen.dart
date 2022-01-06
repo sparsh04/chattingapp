@@ -168,9 +168,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     Expanded(
                       child: TextField(
                         controller: messageTextEdittingContoller,
-                        onChanged: (value) {
-                          addMessage(false);
-                        },
                         style: TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           border: InputBorder.none,
