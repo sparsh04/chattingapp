@@ -1,3 +1,4 @@
+import 'package:chattingapp/helperfunctions/authenticate.dart';
 import 'package:chattingapp/services/auth.dart';
 import 'package:chattingapp/views/home.dart';
 import 'package:chattingapp/views/signin.dart';
@@ -10,8 +11,21 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  // bool showIgnIn = true;
+
+  // void toggleView() {
+  //   setState(() {
+  //     showIgnIn = !showIgnIn;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +41,7 @@ class MyApp extends StatelessWidget {
           if (snapshot.hasData) {
             return const Home();
           } else {
-            return const Signin();
+            return const Authenticate();
           }
         },
       ),

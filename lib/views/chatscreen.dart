@@ -105,7 +105,8 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-//use stream whnerver there is change in data and for that use stream builder
+//use stream whnerver there is change in data and for that use stream
+
   Widget chatMessages() {
     return StreamBuilder(
         stream: messageStream,

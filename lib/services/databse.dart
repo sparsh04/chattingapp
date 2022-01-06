@@ -84,4 +84,9 @@ class DatabaseMethods {
         .where("username", isEqualTo: username)
         .get();
   }
+
+  //for the signup button
+  uploadUserInfo(userMap) {
+    FirebaseFirestore.instance.collection("users").add(userMap);
+  }
 }

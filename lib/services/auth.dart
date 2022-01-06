@@ -8,10 +8,10 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthMedthods {
-  final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   getCurrentUser() async {
-    return auth.currentUser;
+    return _auth.currentUser;
   }
 
   signInwithGoogle(BuildContext context) async {
@@ -61,10 +61,53 @@ class AuthMedthods {
   Future signOut() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.clear();
-
     final _googleSignIn = GoogleSignIn();
-
+    await _auth.signOut();
     await _googleSignIn.disconnect();
-    await auth.signOut();
+    print("Preferences cleared");
+  }
+
+//the functions with the text part are here
+
+  Future<User?> signInwithEmailAndPassword(
+      String email, String password) async {
+    try {
+      UserCredential _result = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
+      User? firebaseuser = _result.user;
+      //firebaseuser.
+      print(firebaseuser.toString() + " abcd " + email + " " + password);
+      return firebaseuser;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<User?> signupwithemailandpassword(
+      String email, String password) async {
+    try {
+      UserCredential _result = await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      User? firebaseuser = _result.user;
+      return firebaseuser;
+    } catch (e) {
+      //  print(e.toString());
+    }
+  }
+
+  Future resetPass(String email) async {
+    try {
+      return await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      //print(e.toString());
+    }
+  }
+
+  Future tsignOut() async {
+    try {
+      return await _auth.signOut();
+    } catch (e) {
+      //   print(e.toString());
+    }
   }
 }

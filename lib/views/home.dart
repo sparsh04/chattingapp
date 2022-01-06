@@ -1,3 +1,4 @@
+import 'package:chattingapp/helperfunctions/authenticate.dart';
 import 'package:chattingapp/helperfunctions/sharedpref_helper.dart';
 import 'package:chattingapp/services/auth.dart';
 import 'package:chattingapp/services/databse.dart';
@@ -170,6 +171,14 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   //   super.initState();
   // }
 
+  // bool showIgnIn = true;
+
+  // void toggleView() {
+  //   setState(() {
+  //     showIgnIn = !showIgnIn;
+  //   });
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -182,7 +191,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const Signin(),
+                    builder: (context) => const Authenticate(),
                   ),
                 );
               });

@@ -6,6 +6,8 @@ class SharedPreferncehelper {
   static String displayNameKey = "USERDISPLAYNAMEKEY";
   static String userEmailKey = "USEREMAILKEY";
   static String userProfileKey = "USERPROFILEKEY";
+  //for text field login screen
+  static String sharedPreferenceUserLoggedInKey = "ISLOGGEDIN";
 
   Future<bool> saveUserName(String? getUserName) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -56,5 +58,13 @@ class SharedPreferncehelper {
   Future<String?>? getProfileUrl() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString(userProfileKey);
+  }
+
+  //for the signin text field only
+  static Future<bool> saveUserLoggedInSharedPreference(
+      bool isUserLoggedIn) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    return await preferences.setBool(
+        sharedPreferenceUserLoggedInKey, isUserLoggedIn);
   }
 }
