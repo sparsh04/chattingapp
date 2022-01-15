@@ -2,6 +2,7 @@ import 'package:chattingapp/helperfunctions/authenticate.dart';
 import 'package:chattingapp/services/auth.dart';
 import 'package:chattingapp/views/home.dart';
 import 'package:chattingapp/views/signin.dart';
+import 'package:chattingapp/views/tabs_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -38,10 +39,14 @@ class _MyAppState extends State<MyApp> {
       home: FutureBuilder(
         future: AuthMedthods().getCurrentUser(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          if (snapshot.hasData) {
-            return const Home();
+          if (snapshot.connectionState != ConnectionState.waiting) {
+            if (snapshot.hasData) {
+              return const TabsScreen();
+            } else {
+              return const Authenticate();
+            }
           } else {
-            return const Authenticate();
+            return const CircularProgressIndicator();
           }
         },
       ),

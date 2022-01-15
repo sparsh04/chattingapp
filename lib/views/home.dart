@@ -3,8 +3,6 @@ import 'package:chattingapp/helperfunctions/sharedpref_helper.dart';
 import 'package:chattingapp/services/auth.dart';
 import 'package:chattingapp/services/databse.dart';
 import 'package:chattingapp/views/chatscreen.dart';
-import 'package:chattingapp/views/offline_online.dart';
-import 'package:chattingapp/views/signin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +16,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with WidgetsBindingObserver {
   bool issearching = false;
-  String? myName, myProfilepic, myUserName, myEmail;
+  String? myName, myProfilepic, myEmail;
+  String myUserName = "";
 
   Stream? userStream, chatRoomStream;
 
@@ -28,7 +27,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   getMyInfoFromSHaredPrefrences() async {
     myName = await SharedPreferncehelper().getDisplayName();
     myProfilepic = await SharedPreferncehelper().getProfileUrl();
-    myUserName = await SharedPreferncehelper().getUSerName();
+    myUserName = (await SharedPreferncehelper().getUSerName())!;
     myEmail = await SharedPreferncehelper().getuseremail();
   }
 
@@ -39,6 +38,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
     onScreenloaded();
+    setStatus("Online");
   }
 
   void setStatus(String status) async {
@@ -54,27 +54,29 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     }
   }
 
-  getChatRoomIdByUserNames(String a, String b) {
-    if (a.compareTo(b) == 1) {
+  getChatRoomIdByUserNames(String? a, String? b) {
+    if (a!.compareTo(b!) == 1) {
       // a < b returns -1, 0 if equal, 1 if b<a
+      // ignore: unnecessary_string_escapes
       return "$b\_$a";
-    } else {
+    } else if (a.compareTo(b) == -1) {
+      // ignore: unnecessary_string_escapes
       return "$a\_$b";
     }
   }
 
-  onSearchBtnCLick() async {
+  onSearchBtnCLick() {
     issearching = true;
-    setState(() {});
-    userStream = await DatabaseMethods()
-        .getUserByName(searchUsernameeditingcontroller.text);
+    userStream =
+        DatabaseMethods().getUserByName(searchUsernameeditingcontroller.text);
     setState(() {});
   }
 
   Widget searchListUsertile({username, profileUrl, name, email}) {
+    WidgetsFlutterBinding.ensureInitialized();
     return GestureDetector(
       onTap: () {
-        var chatroomid = getChatRoomIdByUserNames(myUserName!, username);
+        var chatroomid = getChatRoomIdByUserNames(myUserName, username);
 
         Map<String, dynamic> chatRoomInfoMap = {
           "users": [myUserName, username]
@@ -85,14 +87,17 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ChatScreen(username, name),
+            builder: (context) => ChatScreen(
+              username,
+              name,
+            ),
           ),
         );
       },
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(40),
+            borderRadius: BorderRadius.circular(60),
             child: Image.network(
               profileUrl,
               height: 30,
@@ -108,31 +113,38 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               Text(name),
               Text(email),
             ],
-          )
+          ),
+          const SizedBox(
+            width: 8,
+          ),
+          const Divider(
+            color: Colors.black,
+          ),
         ],
       ),
     );
   }
 
-  Widget searchUsersList() {
+  StreamBuilder searchUsersList() {
+    //WidgetsFlutterBinding.ensureInitialized();
     return StreamBuilder<dynamic>(
         stream: userStream,
         builder: (context, snapshot) {
-          return snapshot.hasData
-              ? ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    DocumentSnapshot ds = snapshot.data!.docs[index];
-                    return searchListUsertile(
-                        username: ds["username"],
-                        profileUrl: ds["imgUrl"],
-                        name: ds["name"],
-                        email: ds["email"]);
-                  })
-              : const Center(
-                  child: CircularProgressIndicator(),
-                );
+          if (snapshot.connectionState != ConnectionState.waiting) {
+            return ListView.builder(
+                itemCount: snapshot.data!.docs.length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  DocumentSnapshot ds = snapshot.data!.docs[index];
+                  return searchListUsertile(
+                      username: ds["username"],
+                      profileUrl: ds["imgUrl"],
+                      name: ds["name"],
+                      email: ds["email"]);
+                });
+          } else {
+            return const CircularProgressIndicator();
+          }
         });
   }
 
@@ -140,17 +152,27 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     return StreamBuilder(
         stream: chatRoomStream,
         builder: (context, AsyncSnapshot snapshot) {
-          return snapshot.hasData
-              ? ListView.builder(
-                  //always use shwrink wrap with streambuilder
-                  shrinkWrap: true,
-                  itemCount: snapshot.data!.docs.length,
-                  itemBuilder: (context, index) {
-                    DocumentSnapshot ds = snapshot.data.docs[index];
-                    return ChatRoomListTile(
-                        ds.id, ds["lastMessage"], myUserName!);
-                  })
-              : Container();
+          // if (snapshot.connectionState != ConnectionState.done) {
+          //   return const CircularProgressIndicator();
+          // }
+          if (snapshot.connectionState != ConnectionState.waiting) {
+            return snapshot.hasData
+                ? ListView.builder(
+                    //always use shwrink wrap with streambuilder
+                    shrinkWrap: true,
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      DocumentSnapshot ds = snapshot.data.docs[index];
+                      // String imgurl =
+                      //     snapshot.data.collection('chats').docs[0]['imgUrl'];
+
+                      return ChatRoomListTile(
+                          ds.id, ds["lastMessage"], myUserName);
+                    })
+                : const CircularProgressIndicator();
+          } else {
+            return const CircularProgressIndicator();
+          }
         });
   }
 
@@ -179,6 +201,20 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   //   });
   // }
 
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  String inputData() {
+    final User? user = auth.currentUser;
+    //print(user!.providerData.toString());
+    String provider = user!.providerData[0].providerId;
+    return provider;
+  }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   inputData();
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -187,14 +223,26 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         actions: [
           InkWell(
             onTap: () {
-              AuthMedthods().signOut().then((s) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Authenticate(),
-                  ),
-                );
-              });
+              setStatus("Offline");
+              if (inputData() == "google.com") {
+                AuthMedthods().signOut().then((s) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Authenticate(),
+                    ),
+                  );
+                });
+              } else {
+                AuthMedthods().tsignOut().then((s) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Authenticate(),
+                    ),
+                  );
+                });
+              }
             },
             child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -248,6 +296,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                               decoration: const InputDecoration(
                                   border: InputBorder.none,
                                   hintText: "username"),
+                              onSubmitted: (name) {
+                                onSearchBtnCLick();
+                              },
                             ),
                           ),
                         ),
@@ -284,9 +335,10 @@ class ChatRoomListTile extends StatefulWidget {
 }
 
 class _ChatRoomListTileState extends State<ChatRoomListTile> {
-  String? profilePicUrl = "", name = "", username = "", status = "";
+  String? name = '', username = '', status = '';
+  var profilePicUrl = '';
 
-  Future getThisUserInfo() async {
+  getThisUserInfo() async {
     username =
         widget.chatroomid.replaceAll(widget.mysername, "").replaceAll("_", "");
     QuerySnapshot<Object?> querySnapshot =
@@ -294,11 +346,19 @@ class _ChatRoomListTileState extends State<ChatRoomListTile> {
     //  print(username);
     // print(widget.chatroomid);
     // print("a0");
-    name = await querySnapshot.docs[0]["name"];
-    profilePicUrl = await querySnapshot.docs[0]["imgUrl"];
-    status = await querySnapshot.docs[0]["status"];
 
-    setState(() {});
+    {
+      name = await querySnapshot.docs[0]["name"];
+      profilePicUrl = await querySnapshot.docs[0]["imgUrl"];
+      status = await querySnapshot.docs[0]["status"];
+    }
+
+    setState(() {
+      name = name;
+      profilePicUrl = profilePicUrl;
+      status = status;
+      username = username;
+    });
   }
 
   @override
@@ -311,56 +371,73 @@ class _ChatRoomListTileState extends State<ChatRoomListTile> {
 
   @override
   Widget build(BuildContext context) {
-    //print(profilePicUrl);
-    //  String? _user = FirebaseAuth.instance.currentUser?.photoURL;
-    //FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    return allChats(widget.lastmessage, widget.mysername, username!);
-    // return Flexible(
-    //   child: Row(
-    //     children: [
-    //       GestureDetector(
-    //         onTap: () {
-    //           Navigator.push(
-    //             context,
-    //             MaterialPageRoute(
-    //               builder: (context) => ChatScreen(username!, name!),
-    //             ),
-    //           );
-    //         },
-    //         child: ClipRRect(
-    //           borderRadius: BorderRadius.circular(32),
-    //           child: Image.network(
-    //             profilePicUrl!,
-    //             height: 30,
-    //             width: 30,
-    //           ),
-    //         ),
-    //       ),
-    //       const SizedBox(
-    //         width: 12,
-    //       ),
-    //       Column(
-    //         crossAxisAlignment: CrossAxisAlignment.start,
-    //         children: [
-    //           Container(height: 40, child: allChats()),
-    //           Text(
-    //             name!,
-    //             style: const TextStyle(fontSize: 16),
-    //           ),
-    //           const SizedBox(
-    //             height: 3,
-    //           ),
-    //           Text(widget.lastmessage),
-    //         ],
-    //       ),
-    //       // Container(
-    //       //   decoration: BoxDecoration(
-    //       //     color: status == "Online" ? Colors.green : Colors.blue,
-    //       //     borderRadius: BorderRadius.circular(1),
-    //       //   ),
-    //       // ),
-    //     ],
-    //   ),
-    // );
+    //  print(widget.imgurl);
+    // String? _user = FirebaseAuth.instance.currentUser?.photoURL;
+    // FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    // return allChats(widget.lastmessage, widget.mysername, username!);
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // const Divider(
+          //   color: Colors.black,
+          // ),
+
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatScreen(username!, name!),
+                ),
+              );
+            },
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(32),
+                  child: Image.network(
+                    profilePicUrl.isNotEmpty
+                        ? profilePicUrl
+                        : "https://www.global.hokudai.ac.jp/wp-content/uploads/2020/07/default-avatar-profile-image-vector-social-media-user-icon-potrait-182347582.jpg",
+                    height: 30,
+                    width: 30,
+                  ),
+                ),
+                const SizedBox(
+                  width: 12,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Container(height: 40, child: allChats()),
+                    Text(
+                      username!,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(
+                      height: 3,
+                    ),
+                    Text(widget.lastmessage),
+                  ],
+                ),
+                const Spacer(),
+                CircleAvatar(
+                  radius: 7,
+                  backgroundColor:
+                      status == "Online" ? Colors.green : Colors.blue,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(
+            width: 8,
+          ),
+          const Divider(
+            color: Colors.black,
+          )
+        ],
+      ),
+    );
   }
 }

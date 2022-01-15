@@ -1,7 +1,8 @@
 import 'package:chattingapp/helperfunctions/sharedpref_helper.dart';
 import 'package:chattingapp/services/auth.dart';
 import 'package:chattingapp/services/databse.dart';
-import 'package:chattingapp/views/home.dart';
+//import 'package:chattingapp/views/home.dart';
+import 'package:chattingapp/views/tabs_screen.dart';
 import 'package:chattingapp/widget/widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -65,8 +66,8 @@ class _TSIgnInState extends State<TSIgnIn> {
           .then((val) {
         if (val != null) {
           SharedPreferncehelper.saveUserLoggedInSharedPreference(true);
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => const Home()));
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => const TabsScreen()));
         }
       });
 

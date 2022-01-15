@@ -1,8 +1,9 @@
 import 'package:chattingapp/helperfunctions/sharedpref_helper.dart';
 import 'package:chattingapp/services/databse.dart';
-import 'package:chattingapp/views/home.dart';
+//import 'package:chattingapp/views/home.dart';
+import 'package:chattingapp/views/tabs_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+//import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -54,7 +55,7 @@ class AuthMedthods {
         .addUserInfoToDb(userDetails!.uid, userInfoMap)
         .then((value) {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const Home()));
+          context, MaterialPageRoute(builder: (context) => const TabsScreen()));
     });
   }
 
@@ -64,7 +65,7 @@ class AuthMedthods {
     final _googleSignIn = GoogleSignIn();
     await _auth.signOut();
     await _googleSignIn.disconnect();
-    print("Preferences cleared");
+    // print("Preferences cleared");
   }
 
 //the functions with the text part are here
@@ -76,10 +77,10 @@ class AuthMedthods {
           email: email, password: password);
       User? firebaseuser = _result.user;
       //firebaseuser.
-      print(firebaseuser.toString() + " abcd " + email + " " + password);
+      // print(firebaseuser.toString() + " abcd " + email + " " + password);
       return firebaseuser;
     } catch (e) {
-      print(e);
+      // print(e);
     }
   }
 
