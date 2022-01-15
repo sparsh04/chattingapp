@@ -1,5 +1,7 @@
-import 'dart:io';
+// ignore_for_file: camel_case_types
 
+import 'dart:io';
+import "dart:core";
 import 'package:chattingapp/feedbackwithslider/feedbackslider.dart';
 import 'package:chattingapp/helperfunctions/authenticate.dart';
 import 'package:chattingapp/helperfunctions/sharedpref_helper.dart';
@@ -23,6 +25,8 @@ class _SettingState extends State<Setting> {
   String? name = '', username = '', status = '';
   var profilePicUrl = '';
   var imageUrl = '';
+  // ignore: prefer_typing_uninitialized_variables
+  var photo;
 
   File? imageFile;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -32,8 +36,16 @@ class _SettingState extends State<Setting> {
   @override
   void initState() {
     super.initState();
-    doThisOnLaunch();
+    getPhoto();
+    // doThisOnLaunch();
     setStatus("Online");
+  }
+
+  void getPhoto() async {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .snapshots();
   }
 
   String inputData() {
@@ -47,7 +59,6 @@ class _SettingState extends State<Setting> {
     DatabaseMethods().updatestatus(status, _auth.currentUser!.uid);
   }
 
-  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       setStatus("Online");
@@ -105,14 +116,14 @@ class _SettingState extends State<Setting> {
 
   // User? user = _auth.currentUser;
 
-  getMyInfoFromSHaredPrefrences() async {
-    name = await SharedPreferncehelper().getDisplayName();
-    profilePicUrl = (await SharedPreferncehelper().getProfileUrl())!;
-  }
+  // getMyInfoFromSHaredPrefrences() async {
+  //   name = await SharedPreferncehelper().getDisplayName();
+  //   profilePicUrl = (await SharedPreferncehelper().getProfileUrl())!;
+  // }
 
-  doThisOnLaunch() async {
-    await getMyInfoFromSHaredPrefrences();
-  }
+  // doThisOnLaunch() async {
+  //   await getMyInfoFromSHaredPrefrences();
+  // }
 
 //FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -156,7 +167,9 @@ class _SettingState extends State<Setting> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(60),
                         child: Image.network(
-                          _auth.currentUser!.photoURL as String,
+                          _auth.currentUser!.photoURL != null
+                              ? _auth.currentUser!.photoURL as String
+                              : "https://www.fortressofsolitude.co.za/wp-content/uploads/2015/09/dragon-ball-z-facts.jpg",
                           height: 40,
                           width: 40,
                         ),
@@ -301,10 +314,10 @@ class _SettingState extends State<Setting> {
                     );
                   });
             },
-            child: texttype("Update DisplayImage", Icons.photo),
+            child: const texttype("Update DisplayImage", Icons.photo),
           ),
           GestureDetector(
-            child: texttype("BugReport", Icons.bug_report_outlined),
+            child: const texttype("BugReport", Icons.bug_report_outlined),
             onTap: () => showDialog(
                 context: context,
                 builder: (context) {
@@ -420,7 +433,7 @@ class _SettingState extends State<Setting> {
           ),
           //feedback report
           GestureDetector(
-            child: texttype("Feedback", Icons.feedback),
+            child: const texttype("Feedback", Icons.feedback),
             onTap: () => showDialog(
                 context: context,
                 builder: (context) {
@@ -475,7 +488,7 @@ class _SettingState extends State<Setting> {
                 }),
           ),
           GestureDetector(
-            child: texttype("Logout", Icons.logout),
+            child: const texttype("Logout", Icons.logout),
             onTap: () {
               setStatus("Offline");
               if (inputData() == "google.com") {
@@ -511,7 +524,8 @@ class texttype extends StatelessWidget {
   // }) : super(key: key);
   final String material;
   final IconData photo;
-  texttype(this.material, this.photo);
+  // ignore: use_key_in_widget_constructors
+  const texttype(this.material, this.photo);
 
   @override
   Widget build(BuildContext context) {

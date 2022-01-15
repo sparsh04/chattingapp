@@ -1,7 +1,10 @@
-import 'dart:io';
+// ignore_for_file: unnecessary_string_escapes
 
+import 'dart:io';
+import "dart:core";
 import 'package:chattingapp/helperfunctions/sharedpref_helper.dart';
 import 'package:chattingapp/services/databse.dart';
+import 'package:chattingapp/views/images_only.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:firebase_core/firebase_core.dart';
@@ -23,7 +26,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   String? chatRoomId, messgaeId = "";
-  Stream? messageStream;
+  Stream? messageStream, imagestream;
   String? myName, myProfilepic, myUserName, myEmail;
   TextEditingController messageTextEdittingContoller = TextEditingController();
   File? imageFile;
@@ -57,6 +60,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
     int status = 1;
 
+    final bytes = imageFile!.readAsBytesSync().lengthInBytes;
+    final kb = bytes / 1024;
+
     await _firestore
         .collection('chatrooms')
         .doc(chatRoomId)
@@ -67,6 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
       "message": "",
       "type": "img",
       "ts": FieldValue.serverTimestamp(),
+      "size": kb.toStringAsFixed(3),
     });
 
     var ref =
@@ -94,7 +101,7 @@ class _ChatScreenState extends State<ChatScreen> {
           .doc(filename)
           .update({"message": imageUrl});
 
-      print(imageUrl);
+      // print(imageUrl);
     }
   }
 
@@ -190,34 +197,38 @@ class _ChatScreenState extends State<ChatScreen> {
     } else
     // if (map['type'] != "img")
     {
-      return Container(
-        height: size.height / 2.5,
-        width: size.width,
-        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-        alignment: map['sendby'] == _auth.currentUser!.displayName
-            ? Alignment.centerLeft
-            : Alignment.centerRight,
-        child: InkWell(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => ShowImage(
-                imageUrl: map['message'],
+      return Row(
+        mainAxisAlignment:
+            sendby ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: [
+          Container(
+            height: size.height / 2.5,
+            width: size.width,
+            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+            alignment: sendby ? Alignment.centerLeft : Alignment.centerRight,
+            child: InkWell(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => ShowImage(
+                    imageUrl: map['message'],
+                  ),
+                ),
+              ),
+              child: Container(
+                height: size.height / 2.5,
+                width: size.width / 2,
+                decoration: BoxDecoration(border: Border.all()),
+                alignment: map['message'] != "" ? null : Alignment.center,
+                child: map['message'] != ""
+                    ? Image.network(
+                        map['message'],
+                        fit: BoxFit.cover,
+                      )
+                    : const CircularProgressIndicator(),
               ),
             ),
           ),
-          child: Container(
-            height: size.height / 2.5,
-            width: size.width / 2,
-            decoration: BoxDecoration(border: Border.all()),
-            alignment: map['message'] != "" ? null : Alignment.center,
-            child: map['message'] != ""
-                ? Image.network(
-                    map['message'],
-                    fit: BoxFit.cover,
-                  )
-                : const CircularProgressIndicator(),
-          ),
-        ),
+        ],
       );
     }
   }
@@ -228,17 +239,17 @@ class _ChatScreenState extends State<ChatScreen> {
     return StreamBuilder(
         stream: messageStream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.connectionState != ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.active) {
             return ListView.builder(
               reverse: true,
               padding: const EdgeInsets.only(bottom: 70, top: 16),
               itemCount: snapshot.data!.docs.length,
               itemBuilder: (context, index) {
-                DocumentSnapshot ds = snapshot.data!.docs[index];
+                DocumentSnapshot? ds = snapshot.data.docs[index];
                 Map<String, dynamic> map =
                     snapshot.data!.docs[index].data() as Map<String, dynamic>;
                 return chatMessageTile(
-                    ds["message"], myUserName == ds["sendBy"], map, context);
+                    ds!["message"], myUserName == ds["sendBy"], map, context);
               },
             );
           } else {
@@ -249,6 +260,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   getandsetMessages() async {
     messageStream = await DatabaseMethods().getChatRoomMessages(chatRoomId);
+    imagestream = await DatabaseMethods().getChatRoomImages(chatRoomId);
     setState(() {});
   }
 
@@ -259,6 +271,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     doThisOnLaunch();
     super.initState();
@@ -266,9 +279,23 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // print(messageStream);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.name),
+        actions: [
+          IconButton(
+              onPressed: () {
+                //print(chatRoomId);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Imagesonly(chatRoomId!),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.image_search)),
+        ],
       ),
 
       // ignore: avoid_unnecessary_containers
@@ -291,7 +318,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         decoration: InputDecoration(
                           prefixIcon: IconButton(
                             // alignment: Alignment.topLeft,
-                            onPressed: () => getImageg(),
+                            onPressed: () {
+                              getImageg();
+                            },
                             icon: const Icon(Icons.photo),
                             color: Colors.white,
                           ),
@@ -340,6 +369,7 @@ class ShowImage extends StatelessWidget {
     final Size size = MediaQuery.of(context).size;
 
     return Scaffold(
+      appBar: AppBar(),
       body: Container(
         height: size.height,
         width: size.width,

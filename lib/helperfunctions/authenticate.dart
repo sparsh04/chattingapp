@@ -1,6 +1,7 @@
 import 'package:chattingapp/views/signin.dart';
 import 'package:chattingapp/views/signup.dart';
 import 'package:flutter/material.dart';
+import "dart:core";
 
 class Authenticate extends StatefulWidget {
   const Authenticate({Key? key}) : super(key: key);

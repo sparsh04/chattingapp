@@ -6,6 +6,7 @@ import 'package:chattingapp/views/chatscreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import "dart:core";
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -74,53 +75,63 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   Widget searchListUsertile({username, profileUrl, name, email}) {
     WidgetsFlutterBinding.ensureInitialized();
-    return GestureDetector(
-      onTap: () {
-        var chatroomid = getChatRoomIdByUserNames(myUserName, username);
+    return SingleChildScrollView(
+      child: GestureDetector(
+        onTap: () {
+          var chatroomid = getChatRoomIdByUserNames(myUserName, username);
 
-        Map<String, dynamic> chatRoomInfoMap = {
-          "users": [myUserName, username]
-        };
+          Map<String, dynamic> chatRoomInfoMap = {
+            "users": [myUserName, username]
+          };
 
-        DatabaseMethods().createChatRoom(chatroomid, chatRoomInfoMap);
+          DatabaseMethods().createChatRoom(chatroomid, chatRoomInfoMap);
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatScreen(
-              username,
-              name,
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                username,
+                name,
+              ),
             ),
-          ),
-        );
-      },
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(60),
-            child: Image.network(
-              profileUrl,
-              height: 30,
-              width: 30,
+          );
+        },
+        child: Column(
+          children: [
+            const SizedBox(height: 8),
+            const Divider(
+              color: Colors.black,
             ),
-          ),
-          const SizedBox(
-            width: 8,
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(name),
-              Text(email),
-            ],
-          ),
-          const SizedBox(
-            width: 8,
-          ),
-          const Divider(
-            color: Colors.black,
-          ),
-        ],
+            Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(60),
+                  child: Image.network(
+                    profileUrl,
+                    height: 30,
+                    width: 30,
+                  ),
+                ),
+                const SizedBox(
+                  width: 8,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(name),
+                    Text(email),
+                  ],
+                ),
+                const SizedBox(
+                  width: 8,
+                ),
+                const Divider(
+                  color: Colors.black,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -291,14 +302,16 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                                 issearching = false;
                               });
                             },
-                            child: TextField(
-                              controller: searchUsernameeditingcontroller,
-                              decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: "username"),
-                              onSubmitted: (name) {
-                                onSearchBtnCLick();
-                              },
+                            child: GestureDetector(
+                              child: TextField(
+                                controller: searchUsernameeditingcontroller,
+                                decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "username"),
+                                onSubmitted: (name) {
+                                  onSearchBtnCLick();
+                                },
+                              ),
                             ),
                           ),
                         ),
@@ -363,6 +376,7 @@ class _ChatRoomListTileState extends State<ChatRoomListTile> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     //_user
     getThisUserInfo();

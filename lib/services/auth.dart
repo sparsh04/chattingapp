@@ -1,6 +1,7 @@
 import 'package:chattingapp/helperfunctions/sharedpref_helper.dart';
 import 'package:chattingapp/services/databse.dart';
 //import 'package:chattingapp/views/home.dart';
+import "dart:core";
 import 'package:chattingapp/views/tabs_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:flutter/cupertino.dart';
@@ -55,7 +56,7 @@ class AuthMedthods {
         .addUserInfoToDb(userDetails!.uid, userInfoMap)
         .then((value) {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const TabsScreen()));
+          context, MaterialPageRoute(builder: (context) => TabsScreen(0)));
     });
   }
 

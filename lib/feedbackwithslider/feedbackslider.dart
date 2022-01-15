@@ -2,6 +2,7 @@ import 'package:chattingapp/services/databse.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import "dart:core";
 
 class FeedbackSlider extends StatefulWidget {
   const FeedbackSlider({Key? key}) : super(key: key);
@@ -15,7 +16,7 @@ class _FeedbackSliderState extends State<FeedbackSlider> {
   var sliderValue = 0.0;
   IconData myFeedback = FontAwesomeIcons.sadTear;
   Color myFeedbackColor = Colors.red;
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   submitFeedbackreport() {
     Map<String, dynamic> feedbackmap = {
@@ -32,62 +33,58 @@ class _FeedbackSliderState extends State<FeedbackSlider> {
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Container(
-              child: Text(
+          child: Text(
             myFeedbackText,
             style: const TextStyle(color: Colors.black, fontSize: 22.0),
-          )),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Container(
-              child: Icon(
+          child: Icon(
             myFeedback,
             color: myFeedbackColor,
             size: 100.0,
-          )),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Container(
-            child: Slider(
-              min: 0.0,
-              max: 5.0,
-              divisions: 5,
-              value: sliderValue,
-              activeColor: Color(0xffff520d),
-              inactiveColor: Colors.blueGrey,
-              onChanged: (newValue) {
-                setState(() {
-                  sliderValue = newValue;
-                  if (sliderValue >= 0.0 && sliderValue <= 1.0) {
-                    myFeedback = FontAwesomeIcons.sadTear;
-                    myFeedbackColor = Colors.red;
-                    myFeedbackText = "COULD BE BETTER";
-                  }
-                  if (sliderValue >= 1.1 && sliderValue <= 2.0) {
-                    myFeedback = FontAwesomeIcons.frown;
-                    myFeedbackColor = Colors.yellow;
-                    myFeedbackText = "BELOW AVERAGE";
-                  }
-                  if (sliderValue >= 2.1 && sliderValue <= 3.0) {
-                    myFeedback = FontAwesomeIcons.meh;
-                    myFeedbackColor = Colors.amber;
-                    myFeedbackText = "NORMAL";
-                  }
-                  if (sliderValue >= 3.1 && sliderValue <= 4.0) {
-                    myFeedback = FontAwesomeIcons.smile;
-                    myFeedbackColor = Colors.green;
-                    myFeedbackText = "GOOD";
-                  }
-                  if (sliderValue >= 4.1 && sliderValue <= 5.0) {
-                    myFeedback = FontAwesomeIcons.laugh;
-                    myFeedbackColor = Color(0xffff520d);
-                    myFeedbackText = "EXCELLENT";
-                  }
-                });
-              },
-            ),
+          child: Slider(
+            min: 0.0,
+            max: 5.0,
+            divisions: 5,
+            value: sliderValue,
+            activeColor: const Color(0xffff520d),
+            inactiveColor: Colors.blueGrey,
+            onChanged: (newValue) {
+              setState(() {
+                sliderValue = newValue;
+                if (sliderValue >= 0.0 && sliderValue <= 1.0) {
+                  myFeedback = FontAwesomeIcons.sadTear;
+                  myFeedbackColor = Colors.red;
+                  myFeedbackText = "COULD BE BETTER";
+                }
+                if (sliderValue >= 1.1 && sliderValue <= 2.0) {
+                  myFeedback = FontAwesomeIcons.frown;
+                  myFeedbackColor = Colors.yellow;
+                  myFeedbackText = "BELOW AVERAGE";
+                }
+                if (sliderValue >= 2.1 && sliderValue <= 3.0) {
+                  myFeedback = FontAwesomeIcons.meh;
+                  myFeedbackColor = Colors.amber;
+                  myFeedbackText = "NORMAL";
+                }
+                if (sliderValue >= 3.1 && sliderValue <= 4.0) {
+                  myFeedback = FontAwesomeIcons.smile;
+                  myFeedbackColor = Colors.green;
+                  myFeedbackText = "GOOD";
+                }
+                if (sliderValue >= 4.1 && sliderValue <= 5.0) {
+                  myFeedback = FontAwesomeIcons.laugh;
+                  myFeedbackColor = const Color(0xffff520d);
+                  myFeedbackText = "EXCELLENT";
+                }
+              });
+            },
           ),
         ),
         Padding(
@@ -116,8 +113,7 @@ class _FeedbackSliderState extends State<FeedbackSlider> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Container(
-                    child: Align(
+                child: Align(
                   alignment: Alignment.bottomCenter,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -148,7 +144,7 @@ class _FeedbackSliderState extends State<FeedbackSlider> {
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     },
                   ),
-                )),
+                ),
               ),
             ],
           ),

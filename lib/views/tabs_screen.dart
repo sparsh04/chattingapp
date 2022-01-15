@@ -1,10 +1,16 @@
+//import 'package:chattingapp/videoagora/videocall.dart';
+// ignore_for_file: prefer_typing_uninitialized_variables
+import "dart:core";
+import 'package:chattingapp/groups/group_chat_screen.dart';
 import 'package:chattingapp/views/home.dart';
 import 'package:chattingapp/views/settings.dart';
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class TabsScreen extends StatefulWidget {
-  const TabsScreen({Key? key}) : super(key: key);
-
+  //const TabsScreen({Key? key}) : super(key: key);
+  var initialindex;
+  TabsScreen(this.initialindex, {Key? key}) : super(key: key);
   //final List<Meals> favcreen;
   //TabsScreen(this.favcreen);
 
@@ -19,9 +25,11 @@ class _TabsScreenState extends State<TabsScreen> {
 
   @override
   void initState() {
+    _selectpageindex = widget.initialindex;
     _pages = [
       {'page': const Home(), 'title': 'Chats'},
-      {'page': const Setting(), 'title': 'Settings'}
+      {'page': const GroupChatHomeScreen(), 'title': 'Groups'},
+      {'page': const Setting(), 'title': 'Setting'},
     ];
     super.initState();
   }
@@ -49,6 +57,11 @@ class _TabsScreenState extends State<TabsScreen> {
             // backgroundColor: Theme.of(context).primaryColor,
             icon: Icon(Icons.chat_sharp),
             label: 'Chats',
+          ),
+          BottomNavigationBarItem(
+            // backgroundColor: Theme.of(context).primaryColor,
+            icon: Icon(Icons.group),
+            label: 'Groups',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),

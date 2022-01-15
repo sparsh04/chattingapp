@@ -2,8 +2,12 @@ import 'package:chattingapp/helperfunctions/sharedpref_helper.dart';
 import 'package:chattingapp/services/auth.dart';
 import 'package:chattingapp/services/databse.dart';
 //import 'package:chattingapp/views/home.dart';
+import "dart:core";
 import 'package:chattingapp/views/tabs_screen.dart';
 import 'package:chattingapp/widget/widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class SignUp extends StatefulWidget {
@@ -22,18 +26,23 @@ class _SignUpState extends State<SignUp> {
   AuthMedthods authMethods = AuthMedthods();
   DatabaseMethods databaseMethods = DatabaseMethods();
   //HelperFunctions helperFunctions = HelperFunctions();
+  FirebaseAuth _auth = FirebaseAuth.instance;
 
   final formKey = GlobalKey<FormState>();
   TextEditingController username = TextEditingController();
   TextEditingController emailcontroller = TextEditingController();
   TextEditingController passwordcontroller = TextEditingController();
 
-  signMeUP() {
+  signMeUP() async {
     if (formKey.currentState!.validate()) {
       Map<String, String> userInfoMap = {
         "name": username.text,
         "email": emailcontroller.text,
-        "username": emailcontroller.text.replaceAll("@gmail.com", ""),
+        "username": username.text,
+        "imgUrl":
+            "https://www.fortressofsolitude.co.za/wp-content/uploads/2015/09/dragon-ball-z-facts.jpg",
+        "status": "Offline",
+        "uid": '',
       };
 
       SharedPreferncehelper().saveUserEmail(emailcontroller.text);
@@ -46,14 +55,28 @@ class _SignUpState extends State<SignUp> {
           .signupwithemailandpassword(
               emailcontroller.text, passwordcontroller.text)
           // ignore: avoid_print
-          .then((value) {
+          .then((value) async {
         //print("${value.uid}"));
+
+        userInfoMap['uid'] = FirebaseAuth.instance.currentUser!.uid;
 
         databaseMethods.uploadUserInfo(userInfoMap);
         SharedPreferncehelper.saveUserLoggedInSharedPreference(true);
 
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const TabsScreen()));
+        userInfoMap['uid'] = FirebaseAuth.instance.currentUser!.uid;
+
+        // await FirebaseFirestore.instance
+        //     .collection("users")
+        //     .doc(_auth.currentUser!.uid)
+        //     .update(userInfoMap);
+        DatabaseMethods().updateusercredentials(
+            username.text,
+            "https://www.fortressofsolitude.co.za/wp-content/uploads/2015/09/dragon-ball-z-facts.jpg",
+            emailcontroller.text,
+            passwordcontroller.text);
+
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => TabsScreen(0)));
       });
     }
   }
@@ -61,25 +84,32 @@ class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue,
+      backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
         title: const Text("Messenger Clone"),
       ),
       body: _isloaading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Container(
-                alignment: Alignment.bottomCenter,
+          : Center(
+              child: SingleChildScrollView(
                 child: Container(
-                  height: MediaQuery.of(context).size.height - 50,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.blue),
+                  //  height: MediaQuery.of(context).size.height - 50,
                   padding: const EdgeInsets.symmetric(horizontal: 24),
+                  margin: const EdgeInsets.all(10),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    // mainAxisSize: MainAxisSize.min,
+                    //  mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Form(
                         key: formKey,
                         child: Column(
                           children: [
+                            const SizedBox(
+                              height: 20,
+                            ),
                             TextFormField(
                               validator: (val) {
                                 return val!.isEmpty || val.length < 4
@@ -111,23 +141,23 @@ class _SignUpState extends State<SignUp> {
                               },
                               controller: passwordcontroller,
                               style: textst(),
-                              decoration: textField("password"),
+                              decoration: textField("Password"),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Container(
-                        alignment: Alignment.centerRight,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          child: Text(
-                            "Forget Password",
-                            style: textst(),
-                          ),
-                        ),
-                      ),
+                      // Container(
+                      //   alignment: Alignment.centerRight,
+                      //   child: Container(
+                      //     padding: const EdgeInsets.symmetric(
+                      //         horizontal: 16, vertical: 8),
+                      //     child: Text(
+                      //       "Forget Password",
+                      //       style: textst(),
+                      //     ),
+                      //   ),
+                      // ),
                       const SizedBox(height: 8),
                       GestureDetector(
                         onTap: () {
@@ -178,7 +208,7 @@ class _SignUpState extends State<SignUp> {
                         ),
                       ),
                       const SizedBox(
-                        height: 16.0,
+                        height: 20.0,
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -209,7 +239,7 @@ class _SignUpState extends State<SignUp> {
                         ],
                       ),
                       const SizedBox(
-                        height: 8.0,
+                        height: 20.0,
                       ),
                     ],
                   ),

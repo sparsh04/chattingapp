@@ -1,10 +1,9 @@
 import 'package:chattingapp/helperfunctions/authenticate.dart';
 import 'package:chattingapp/services/auth.dart';
-import 'package:chattingapp/views/home.dart';
-import 'package:chattingapp/views/signin.dart';
 import 'package:chattingapp/views/tabs_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import "dart:core";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +40,7 @@ class _MyAppState extends State<MyApp> {
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           if (snapshot.connectionState != ConnectionState.waiting) {
             if (snapshot.hasData) {
-              return const TabsScreen();
+              return TabsScreen(0);
             } else {
               return const Authenticate();
             }
