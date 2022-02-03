@@ -1,4 +1,4 @@
-# chattingapp
+# my_kisan
 
 A new Flutter project.
 
